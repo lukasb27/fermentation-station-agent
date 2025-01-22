@@ -1,0 +1,37 @@
+name: CI
+on: pull_request
+
+permissions:
+  pull-requests: write
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+            python-version: '3.13'
+        # see details (matrix, python-version, python-version-file, etc.)
+        # https://github.com/actions/setup-python
+      - name: Install poetry
+        uses: abatilo/actions-poetry@v4
+      - name: Setup a local virtual environment (if no poetry.toml file)
+        run: |
+          poetry config virtualenvs.create true --local
+          poetry config virtualenvs.in-project true --local
+      - uses: actions/cache@v3
+        name: Define a cache for the virtual environment based on the dependencies lock file
+        with:
+          path: ./.venv
+          key: venv-${{ hashFiles('poetry.lock') }}
+      - name: Install tox and any other packages
+        run: pip install tox
+      - name: Run Tox
+        run: tox
+      - name: Get Cover 
+        uses: orgoro/coverage@v3.2
+        with:
+            coverageFile: coverage_data.xml
+            token: ${{ secrets.GITHUB_TOKEN }}
