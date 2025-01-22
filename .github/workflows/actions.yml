@@ -35,3 +35,7 @@ jobs:
         with:
             coverageFile: coverage_data.xml
             token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Validate PR title
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
