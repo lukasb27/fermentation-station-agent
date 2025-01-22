@@ -21,5 +21,7 @@ jobs:
         with:
           path: ./.venv
           key: venv-${{ hashFiles('poetry.lock') }}
+      - name: Install tox and any other packages
+        run: pip install tox
       - name: Run Tox
         run: tox
