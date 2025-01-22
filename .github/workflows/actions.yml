@@ -27,3 +27,8 @@ jobs:
         run: pip install tox
       - name: Run Tox
         run: tox
+      - name: Get Cover 
+        uses: orgoro/coverage@v3.2
+        with:
+            coverageFile: coverage_data.xml
+            token: ${{ secrets.GITHUB_TOKEN }}
