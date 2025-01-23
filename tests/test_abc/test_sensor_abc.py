@@ -1,4 +1,4 @@
-from src.abc.sensor import Sensor
+from src.abcs.sensor import Sensor
 import pytest
 
 def test_instantiation_fails():
