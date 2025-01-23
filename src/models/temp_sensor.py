@@ -1,6 +1,6 @@
 from random import randint
 
-from src.abc.sensor import Sensor
+from src.abcs.sensor import Sensor
 
 
 class TempSensor(Sensor):

@@ -1,0 +1,2 @@
+MAX_TEMP = 21
+MIN_TEMP = 17
