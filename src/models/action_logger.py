@@ -3,10 +3,16 @@ import json
 import os
 import logging
 
-class ActionLogger():
-    """ Class for logging actions the controller has taken. """
-    def __init__(self, last_action_file_path: str = "last_known_action.json", log_path: str = "actions.log"):
-        """Construct the action logger object, set the logger variable with 
+
+class ActionLogger:
+    """Class for logging actions the controller has taken."""
+
+    def __init__(
+        self,
+        last_action_file_path: str = "last_known_action.json",
+        log_path: str = "actions.log",
+    ):
+        """Construct the action logger object, set the logger variable with
         correct paths for last action fiel and log path. Last action file is used
         to stop excessive logging of the same action.
 
@@ -23,8 +29,8 @@ class ActionLogger():
         self.logger.setLevel(logging.INFO)
 
     def _check_file_exists(self) -> bool:
-        """Check if the last known action file exists already. 
-        
+        """Check if the last known action file exists already.
+
         :return: True if file exists.
         :rtype: bool
         """
@@ -37,22 +43,22 @@ class ActionLogger():
         :rtype: Dict[str, str]
         """
         if self._check_file_exists():
-            with open(self.last_action_file_path, 'r') as file:
+            with open(self.last_action_file_path, "r") as file:
                 return json.load(file)
         else:
             return {"last_known_action": "none"}
-    
+
     def set_last_known_action(self, action) -> None:
         """Set the last commited action by the fermentation station.
 
         :param action: Should be either "heating" or "cooling"
         :type action: str
         """
-        with open(self.last_action_file_path, 'w', encoding='utf-8') as f:
+        with open(self.last_action_file_path, "w", encoding="utf-8") as f:
             json.dump({"last_known_action": action}, f, ensure_ascii=False, indent=4)
-    
+
     def log_action(self, action) -> None:
-        """Read the last known action from the last known action file. 
+        """Read the last known action from the last known action file.
         If it is different to the current action, write the current action to the log.
 
         :param action: the action being taken by the controller.
