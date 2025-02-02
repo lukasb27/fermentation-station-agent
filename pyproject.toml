@@ -1,5 +1,5 @@
 [project]
-name = "fermentation-station-agent"
+name = "fermentation-station"
 version = "0.1.0"
 description = "Fermentation station agent"
 authors = [
