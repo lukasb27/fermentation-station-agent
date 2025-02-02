@@ -1,4 +1,4 @@
-from src.models.controller import Controller 
+from fermentation-station.models.controller import Controller 
 
 def main():
     controller = Controller()
