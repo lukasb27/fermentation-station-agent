@@ -4,5 +4,5 @@ router = APIRouter()
 
 
 @router.get("/")
-async def get_temp():
+async def get_root():
     return {"status": "ok"}
