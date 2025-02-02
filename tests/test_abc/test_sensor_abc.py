@@ -1,4 +1,4 @@
-from src.abcs.sensor import Sensor
+from fermentation_station.abcs.sensor import Sensor
 import pytest
 
 def test_instantiation_fails():

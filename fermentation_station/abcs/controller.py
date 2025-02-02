@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from src.abcs.sensor import Sensor
+from fermentation_station.abcs.sensor import Sensor
 
 
 class Controller(ABC):

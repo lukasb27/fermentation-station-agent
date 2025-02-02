@@ -1,4 +1,4 @@
-from src.models.temp_sensor import TempSensor
+from fermentation_station.models.temp_sensor import TempSensor
 import pytest
 
 @pytest.fixture()

@@ -1,6 +1,6 @@
 from random import randint
 
-from src.abcs.sensor import Sensor
+from fermentation_station.abcs.sensor import Sensor
 
 
 class TempSensor(Sensor):

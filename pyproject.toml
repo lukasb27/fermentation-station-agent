@@ -1,5 +1,5 @@
 [project]
-name = "fermentation-station-agent"
+name = "fermentation-station"
 version = "0.1.0"
 description = "Fermentation station agent"
 authors = [
@@ -14,12 +14,15 @@ dependencies = [
     "isort (>=5.13.2,<6.0.0)",
     "mypy (>=1.14.1,<2.0.0)",
     "pytest-cov (>=6.0.0,<7.0.0)",
-    "flake8 (>=7.1.1,<8.0.0)"
+    "flake8 (>=7.1.1,<8.0.0)",
+    "fastapi (>=0.115.8,<0.116.0)",
+    "uvicorn (>=0.34.0,<0.35.0)",
+    "httpx (>=0.28.1,<0.29.0)"
 ]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.poetry]
-package-mode = false
+[tool.poetry.scripts]
+fermentation-station = "fermentation_station.main:main"
