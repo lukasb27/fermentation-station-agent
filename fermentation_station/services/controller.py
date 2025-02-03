@@ -2,7 +2,7 @@ from typing import Dict
 
 from fermentation_station.abcs.controller import Controller
 from fermentation_station.constants import MAX_TEMP, MIN_TEMP
-from fermentation_station.models.temp_sensor import TempSensor
+from fermentation_station.services.temp_sensor import TempSensor
 
 
 class Controller(Controller):
