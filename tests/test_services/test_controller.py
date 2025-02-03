@@ -1,4 +1,4 @@
-from fermentation_station.models.controller import Controller
+from fermentation_station.services.controller import Controller
 import pytest
 from unittest.mock import MagicMock
 

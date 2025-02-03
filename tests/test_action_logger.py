@@ -1,5 +1,5 @@
 import pytest
-from fermentation_station.models.action_logger import ActionLogger
+from fermentation_station.services.action_logger import ActionLogger
 import json 
 import os
 

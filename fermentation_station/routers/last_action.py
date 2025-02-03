@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from fermentation_station.models.action_logger import ActionLogger
+from fermentation_station.services.action_logger import ActionLogger
 
 router = APIRouter()
 
