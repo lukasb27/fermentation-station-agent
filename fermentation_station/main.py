@@ -1,4 +1,3 @@
-import uvicorn
 from fastapi import FastAPI
 
 from fermentation_station.routers import temp, root, last_action
