@@ -8,10 +8,11 @@ ENV PYTHONUNBUFFERED=1 \
     POETRY_VERSION=2.3.1 \
     POETRY_HOME="/opt/poetry" \
     POETRY_VIRTUALENVS_IN_PROJECT=true \
-    POETRY_NO_INTERACTION=1
+    PYSETUP_PATH="/opt/pysetup" \
+    POETRY_NO_INTERACTION=1 \
+    VENV_PATH="/opt/pysetup/.venv"
 
-ENV PATH="$POETRY_HOME/bin:/app/.venv/bin:$PATH"
-
+ENV PATH="$POETRY_HOME/bin:$VENV_PATH/bin:$PATH"
 
 # -------------------------------------------------
 # Builder stage
@@ -26,11 +27,16 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 
 RUN curl -sSL https://install.python-poetry.org | python3 -
 
-WORKDIR /app
-RUN git clone -b dockerfile https://github.com/lukasb27/fermentation-station-agent.git .
+# copy project requirement files here to ensure they will be cached.
+WORKDIR $PYSETUP_PATH
+COPY poetry.lock pyproject.toml ./
 
 RUN --mount=type=cache,target=/root/.cache \
-    poetry install
+    poetry install --no-root
+
+# RUN poetry config virtualenvs.create false \
+    # && poetry install --no-root
+
 
 # -------------------------------------------------
 # Development image
@@ -38,9 +44,11 @@ RUN --mount=type=cache,target=/root/.cache \
 FROM python-base as development
 ENV FASTAPI_ENV=development
 
-WORKDIR /app
-COPY --from=builder-base /app /app
+COPY --from=builder-base $PYSETUP_PATH $PYSETUP_PATH
 COPY --from=builder-base $POETRY_HOME $POETRY_HOME
+RUN poetry install
+
+WORKDIR /app
 
 EXPOSE 8000
 CMD ["uvicorn", "fermentation_station.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
@@ -52,8 +60,10 @@ CMD ["uvicorn", "fermentation_station.main:app", "--reload", "--host", "0.0.0.0"
 FROM python-base as production
 ENV FASTAPI_ENV=production
 
+ENV FASTAPI_ENV=production
+COPY --from=builder-base $PYSETUP_PATH $PYSETUP_PATH
+COPY ./fermentation_station /app/fermentation_station
 WORKDIR /app
-COPY --from=builder-base /app /app
-COPY --from=builder-base $POETRY_HOME $POETRY_HOME
 
+EXPOSE 8000
 CMD ["uvicorn", "fermentation_station.main:app", "--host", "0.0.0.0", "--port", "8000"]
