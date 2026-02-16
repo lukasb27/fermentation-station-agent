@@ -3,7 +3,7 @@ import os
 
 def create_template(branch: str) -> str:
     branch = branch.lower()
-    env = Environment(loader=FileSystemLoader("utils/templates"))
+    env = Environment(loader=FileSystemLoader("fermentation-station-agent/utils/templates"))
     template = env.get_template("argocd-application.template.yaml")
 
     output = template.render(
