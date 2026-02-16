@@ -6,12 +6,12 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: git@github.com:lukasb27/fermentation-station-agent.git
-    targetRevision: HEAD
+    repoURL: https://github.com/lukasb27/fermentation-station-agent.git
+    targetRevision: {{ BRANCH }}
     path: k8s
     kustomize:
       images:
-        - {{ IMAGE }}
+        - lukasball/fermentation-station-agent={{ IMAGE }}
   destination:
     server: https://kubernetes.default.svc
     namespace: {{ NAMESPACE }}
