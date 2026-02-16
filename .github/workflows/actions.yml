@@ -72,7 +72,7 @@ jobs:
         run: |
           LOWER_BRANCH=$(echo "${BRANCH_NAME}" | tr '[:upper:]' '[:lower:]')
 
-          cp ${LOWER_BRANCH}.yaml fermentation-station-argocd-control/${LOWER_BRANCH}.yaml
+          cp ${LOWER_BRANCH}.yaml fermentation-station-argocd-control/apps/${LOWER_BRANCH}.yaml
 
           # Move into the external repo directory to perform Git operations
           cd fermentation-station-argocd-control
@@ -80,7 +80,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          git add ${LOWER_BRANCH}.yaml
+          git add apps/${LOWER_BRANCH}.yaml
          
           if git diff --staged --quiet; then
             echo "No changes to commit"
