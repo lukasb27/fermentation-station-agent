@@ -20,8 +20,7 @@ jobs:
         run: |
           # Standardize the branch name to match the creation logic
           LOWER_BRANCH=$(echo "${BRANCH_NAME}" | tr '[:upper:]' '[:lower:]')
-          FILE_PATH="${LOWER_BRANCH}.yaml"
-
+          FILE_PATH="apps/${LOWER_BRANCH}.yaml"
           # Only proceed if the file exists
           if [ -f "$FILE_PATH" ]; then
             git config user.name "github-actions[bot]"
