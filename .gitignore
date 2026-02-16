@@ -172,3 +172,6 @@ cython_debug/
 
 # Coverage data
 coverage_data.xml
+
+# Log 
+last_known_action.json

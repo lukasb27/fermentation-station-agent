@@ -39,3 +39,52 @@ jobs:
         uses: amannn/action-semantic-pull-request@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  ephemeral-environment-setup:
+    runs-on: ubuntu-latest
+    needs: ci  
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v4
+        with:
+          path: fermentation-station-agent
+      - name: check out argo cd control repo
+        uses: actions/checkout@v4
+        with:
+          repository: lukasb27/fermentation-station-argocd-control
+          token: ${{ secrets.ARGO_CD_REPO_TOKEN }}
+          path: fermentation-station-argocd-control
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+            python-version: '3.13'
+        # see details (matrix, python-version, python-version-file, etc.)
+        # https://github.com/actions/setup-python
+      - name: Install jinja2
+        run: pip install jinja2
+      - name: Run YAML generator
+        env:
+          BRANCH: ${{ github.head_ref }}
+        run: python3 fermentation-station-agent/utils/argo_app_writer.py
+      - name: Copy YAML file to new repo and push
+        env:
+          BRANCH_NAME: ${{ github.head_ref }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          LOWER_BRANCH=$(echo "${BRANCH_NAME}" | tr '[:upper:]' '[:lower:]')
+
+          cp ${LOWER_BRANCH}.yaml fermentation-station-argocd-control/apps/${LOWER_BRANCH}.yaml
+
+          # Move into the external repo directory to perform Git operations
+          cd fermentation-station-argocd-control
+          
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add apps/${LOWER_BRANCH}.yaml
+         
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Add ArgoCD application for PR ${PR_NUMBER} (Branch: ${BRANCH_NAME})"
+            git push
+          fi
