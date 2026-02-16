@@ -2,16 +2,17 @@ from jinja2 import Environment, FileSystemLoader
 import os
 
 def create_template(branch: str) -> str:
-    branch = branch.lower()
+    branch_lower = branch.lower()
     current_dir = os.path.dirname(os.path.abspath(__file__))
     template_dir = os.path.join(current_dir, "templates")
     env = Environment(loader=FileSystemLoader(template_dir))
     template = env.get_template("argocd-application.template.yaml")
 
     output = template.render(
-        APP_NAME=f"fermentation-station-agent-{branch}",
-        NAMESPACE=branch,
-        IMAGE=f"lukasball/fermentation-station-agent:{branch}"
+        APP_NAME=f"fermentation-station-agent-{branch_lower}",
+        NAMESPACE=branch_lower,
+        IMAGE=f"lukasball/fermentation-station-agent:{branch_lower}",
+        BRANCH=branch
     )
 
     return output

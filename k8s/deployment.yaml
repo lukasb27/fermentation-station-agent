@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: fermentation-station-agent
+  name: fermentation-station-agent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fermentation-station-agent
+  template:
+    metadata:
+      labels:
+        app: fermentation-station-agent
+    spec:
+      containers:
+      - image: lukasball/fermentation-station-agent
+        name: fermentation-station-agent
