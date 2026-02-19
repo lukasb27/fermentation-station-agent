@@ -37,6 +37,25 @@ RUN --mount=type=cache,target=/root/.cache \
 # RUN poetry config virtualenvs.create false \
     # && poetry install --no-root
 
+# -------------------------------------------------
+# Test image
+# -------------------------------------------------
+FROM python-base as test
+
+# Copy the venv and poetry from builder
+COPY --from=builder-base $PYSETUP_PATH $PYSETUP_PATH
+COPY --from=builder-base $POETRY_HOME $POETRY_HOME
+
+# Install the 'test' group specifically
+WORKDIR $PYSETUP_PATH
+RUN poetry install --with integ-test --no-root
+
+# Copy your application and your features folder
+WORKDIR /app
+COPY ./integration_tests /app/integration_tests
+WORKDIR /app/integration_tests/
+# Default command for the test image
+CMD ["behave"]
 
 # -------------------------------------------------
 # Development image
