@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  generateName: integ-tests- 
+  name: integ-tests
   namespace: lukas-test-environment
 spec:
   template:
