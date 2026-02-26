@@ -4,7 +4,6 @@ metadata:
   labels:
     app: fermentation-station-agent
   name: fermentation-station-agent-service
-  namespace: lukas-test-environment
 spec:
   ports:
   - port: 8000
