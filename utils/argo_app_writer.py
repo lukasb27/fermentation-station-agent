@@ -1,7 +1,7 @@
 from jinja2 import Environment, FileSystemLoader
 import os
 
-def create_template(branch: str) -> str:
+def create_template(branch: str, sha: str, pr_number: str) -> str:
     branch_lower = branch.lower()
     current_dir = os.path.dirname(os.path.abspath(__file__))
     template_dir = os.path.join(current_dir, "templates")
@@ -12,7 +12,9 @@ def create_template(branch: str) -> str:
         APP_NAME=f"fermentation-station-agent-{branch_lower}",
         NAMESPACE=branch_lower,
         IMAGE=f"lukasball/fermentation-station-agent:{branch_lower}",
-        BRANCH=branch
+        BRANCH=branch,
+        SHA=sha,
+        PR_NUMBER=pr_number
     )
 
     return output
@@ -23,8 +25,10 @@ def write_output_to_file(path_to_file: str, data: str) -> None:
 
 def main():
     branch = os.environ["BRANCH"]
+    sha = os.environ["SHA"]
+    pr_number = os.environ["PR_NUMBER"]
     filename = f"{branch}.yaml"
-    output = create_template(branch)
+    output = create_template(branch, sha, pr_number)
     write_output_to_file(filename, output)
 
 if __name__ == '__main__':
