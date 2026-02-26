@@ -23,7 +23,7 @@ spec:
       images:
         - lukasball/fermentation-station-agent=lukasball/fermentation-station-agent:{branch_lower}
       commonAnnotations:
-        prNumber: {PR_NUMBER}
+        prNumber: "{PR_NUMBER}"
         sha: {SHA}
   destination:
     server: https://kubernetes.default.svc
