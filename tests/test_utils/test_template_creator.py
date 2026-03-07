@@ -4,6 +4,8 @@ from utils.argo_app_writer import create_template, write_output_to_file
 import os 
 
 BRANCH = "XYZABC"
+PR_NUMBER = "pr-123"
+SHA = "1234"
 branch_lower = BRANCH.lower()
 EXPECTED_OUTPUT = f'''
 apiVersion: argoproj.io/v1alpha1
@@ -20,6 +22,9 @@ spec:
     kustomize:
       images:
         - lukasball/fermentation-station-agent=lukasball/fermentation-station-agent:{branch_lower}
+      commonAnnotations:
+        prNumber: "{PR_NUMBER}"
+        sha: {SHA}
   destination:
     server: https://kubernetes.default.svc
     namespace: {branch_lower}
@@ -31,9 +36,9 @@ spec:
       - CreateNamespace=true
 '''
 
-@mock.patch.dict(os.environ, {"BRANCH": BRANCH})
+@mock.patch.dict(os.environ, {"BRANCH": BRANCH, "SHA": "1234", "PR_NUMBER": "pr-123"})
 def test_config_file_renders_correctly():
-    rendered_output = create_template(BRANCH)
+    rendered_output = create_template(BRANCH, SHA, PR_NUMBER)
     assert rendered_output.strip() == EXPECTED_OUTPUT.strip()
     
 
@@ -44,5 +49,3 @@ def test_output_writes_correctly():
     
     assert file_data == "ok"
     os.remove("test.txt")
-    
-    

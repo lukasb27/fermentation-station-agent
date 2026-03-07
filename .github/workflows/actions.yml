@@ -64,6 +64,8 @@ jobs:
       - name: Run YAML generator
         env:
           BRANCH: ${{ github.head_ref }}
+          SHA: ${{ github.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: python3 fermentation-station-agent/utils/argo_app_writer.py
       - name: Copy YAML file to new repo and push
         env:

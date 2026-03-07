@@ -37,6 +37,27 @@ RUN --mount=type=cache,target=/root/.cache \
 # RUN poetry config virtualenvs.create false \
     # && poetry install --no-root
 
+# -------------------------------------------------
+# Test image
+# -------------------------------------------------
+FROM python-base as test
+
+# Copy the venv and poetry from builder
+COPY --from=builder-base $PYSETUP_PATH $PYSETUP_PATH
+COPY --from=builder-base $POETRY_HOME $POETRY_HOME
+
+WORKDIR $PYSETUP_PATH
+RUN apt-get update && apt-get install curl jq -y
+RUN poetry install --with integ-test --no-root
+
+WORKDIR /app
+COPY ./integration_tests /app/integration_tests
+COPY ./post_report_to_pr.sh /app/post_report_to_pr.sh
+RUN chmod +x /app/post_report_to_pr.sh
+WORKDIR /app/integration_tests/
+
+# Default command for the test image
+CMD ["/app/post_report_to_pr.sh"]
 
 # -------------------------------------------------
 # Development image

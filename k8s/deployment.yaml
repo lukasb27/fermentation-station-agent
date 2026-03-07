@@ -15,5 +15,5 @@ spec:
         app: fermentation-station-agent
     spec:
       containers:
-      - image: lukasball/fermentation-station-agent
+      - image: lukasball/fermentation-station-agent:latest
         name: fermentation-station-agent

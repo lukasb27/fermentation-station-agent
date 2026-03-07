@@ -3,6 +3,8 @@ kind: Kustomization
 
 resources:
   - deployment.yaml
+  - service.yaml
+  - job.yaml
 
 images:
   - name: lukasball/fermentation-station-agent
