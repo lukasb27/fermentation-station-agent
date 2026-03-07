@@ -2,6 +2,9 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: integ-tests
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 spec:
   template:
     spec:
@@ -27,3 +30,4 @@ spec:
           secretName: github-pr-token
       restartPolicy: Never
   backoffLimit: 4
+  ttlSecondsAfterFinished: 300
