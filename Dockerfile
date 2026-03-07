@@ -46,16 +46,18 @@ FROM python-base as test
 COPY --from=builder-base $PYSETUP_PATH $PYSETUP_PATH
 COPY --from=builder-base $POETRY_HOME $POETRY_HOME
 
-# Install the 'test' group specifically
 WORKDIR $PYSETUP_PATH
+RUN apt-get update && apt-get install curl jq -y
 RUN poetry install --with integ-test --no-root
 
-# Copy your application and your features folder
 WORKDIR /app
 COPY ./integration_tests /app/integration_tests
+COPY ./post_report_to_pr.sh /app/post_report_to_pr.sh
+RUN chmod +x /app/post_report_to_pr.sh
 WORKDIR /app/integration_tests/
+
 # Default command for the test image
-CMD ["behave"]
+CMD ["/app/post_report_to_pr.sh"]
 
 # -------------------------------------------------
 # Development image
