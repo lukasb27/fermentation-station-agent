@@ -175,3 +175,6 @@ coverage_data.xml
 
 # Log 
 last_known_action.json
+
+# VScode
+.vscode/
