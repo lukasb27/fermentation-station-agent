@@ -32,6 +32,7 @@ jobs:
         uses: dorny/paths-filter@v3
         id: filter
         with:
+          ref: ${{ github.event.workflow_run.head_sha }}
           base: ${{ steps.base-info.outputs.base_sha }}
           filters: |
             app:
@@ -88,7 +89,7 @@ jobs:
           BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
           PR_NUMBER: ${{ steps.get-pr.outputs.pr_number }}
         run: |
-          LOWER_BRANCH=$(echo "${BRANCH_NAME}" | tr '[:upper:]' '[:lower:]')
+          LOWER_BRANCH=$(echo "${BRANCH_NAME}" | tr '[:upper:]' '[:lower:]' | tr '/' '-')
           cp ${LOWER_BRANCH}.yaml fermentation-station-argocd-control/apps/${LOWER_BRANCH}.yaml
           cd fermentation-station-argocd-control
           git config user.name "github-actions[bot]"
