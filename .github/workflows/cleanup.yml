@@ -19,7 +19,7 @@ jobs:
           BRANCH_NAME: ${{ github.head_ref }}
         run: |
           # Standardize the branch name to match the creation logic
-          LOWER_BRANCH=$(echo "${BRANCH_NAME}" | tr '[:upper:]' '[:lower:]')
+          LOWER_BRANCH=$(echo "${BRANCH_NAME}" | tr '[:upper:]' '[:lower:]' | tr '/' '-')
           FILE_PATH="apps/${LOWER_BRANCH}.yaml"
           # Only proceed if the file exists
           if [ -f "$FILE_PATH" ]; then
