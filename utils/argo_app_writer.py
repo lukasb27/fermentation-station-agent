@@ -27,7 +27,8 @@ def main():
     branch = os.environ["BRANCH"]
     sha = os.environ["SHA"]
     pr_number = os.environ["PR_NUMBER"]
-    filename = f"{branch}.yaml"
+    # Sanitize and lowercase filename to match workflow expectations and avoid path issues
+    filename = f"{branch.lower().replace('/', '-')}.yaml"
     output = create_template(branch, sha, pr_number)
     write_output_to_file(filename, output)
 
