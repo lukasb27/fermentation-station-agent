@@ -9,24 +9,39 @@ on:
 jobs:
   changes:
     runs-on: ubuntu-latest
-    if: github.event.workflow_run.conclusion == 'success'
     outputs:
       app: ${{ steps.filter.outputs.app }}
     steps:
+      - name: Diagnostic Summary
+        run: |
+          echo "### 🔍 Workflow Run Diagnostic" >> $GITHUB_STEP_SUMMARY
+          echo "* **CI Conclusion:** ${{ github.event.workflow_run.conclusion }}" >> $GITHUB_STEP_SUMMARY
+          echo "* **Triggering Branch:** ${{ github.event.workflow_run.head_branch }}" >> $GITHUB_STEP_SUMMARY
+          echo "* **Event:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Verify CI Success
+        if: github.event.workflow_run.conclusion != 'success'
+        run: |
+          echo "❌ CI workflow did not succeed. Skipping ephemeral environment setup." >> $GITHUB_STEP_SUMMARY
+          exit 0 # We exit 0 so the job itself doesn't "fail", but logic stops here
+
       - name: Checkout head
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
-          fetch-depth: 0
+          fetch-depth: 0 # Ensures full history for reliable path filtering
 
       - name: Get Base SHA
         id: base-info
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Query PR by the SHA that triggered the workflow_run
           BASE_SHA=$(gh pr list --repo ${{ github.repository }} --head "${{ github.event.workflow_run.head_branch }}" --json baseRefOid --jq '.[0].baseRefOid // empty')
+          if [ -z "$BASE_SHA" ]; then
+            echo "⚠️ No open PR found for branch. Path filtering might default to false." >> $GITHUB_STEP_SUMMARY
+          fi
           echo "base_sha=${BASE_SHA}" >> "$GITHUB_OUTPUT"
+
       - name: 'Filter paths'
         uses: dorny/paths-filter@v3
         id: filter
@@ -41,6 +56,13 @@ jobs:
               - 'Dockerfile'
               - 'utils/argo_app_writer.py'
               - 'utils/templates/**'
+
+      - name: Filter Summary
+        run: |
+          echo "* **App Changes Detected:** ${{ steps.filter.outputs.app }}" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.filter.outputs.app }}" == "false" ]; then
+            echo "⏭️ No relevant files changed. Setup will be skipped." >> $GITHUB_STEP_SUMMARY
+          fi
 
   ephemeral-environment-setup:
     runs-on: ubuntu-latest
