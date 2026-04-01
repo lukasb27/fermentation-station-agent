@@ -7,63 +7,15 @@ on:
       - completed
 
 jobs:
-  changes:
+  ephemeral-environment-setup:
     runs-on: ubuntu-latest
-    # Logical change: Move diagnostic to a cleaner output
-    outputs:
-      app_changed: ${{ steps.changed-files.outputs.app_any_changed }}
     steps:
       - name: Diagnostic Summary
         run: |
           echo "### 🔍 Workflow Run Diagnostic" >> $GITHUB_STEP_SUMMARY
           echo "* **CI Status:** ${{ github.event.workflow_run.conclusion }}" >> $GITHUB_STEP_SUMMARY
           echo "* **PR Branch:** ${{ github.event.workflow_run.head_branch }}" >> $GITHUB_STEP_SUMMARY
-          echo "* **Triggering Branch:** ${{ github.event.workflow_run.head_branch }}" >> $GITHUB_STEP_SUMMARY
-          echo "* **Event:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
 
-      - name: Checkout head
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
-          fetch-depth: 0
-
-      - name: Get Target Branch
-        id: target-info
-        run: |
-          # Extract the target branch (base ref) from the PR context
-          TARGET_BRANCH=$(echo '${{ toJson(github.event.workflow_run.pull_requests) }}' | jq -r '.[0].base.ref // "main"')
-          git fetch origin "$TARGET_BRANCH" --depth=1
-          echo "target_branch=origin/$TARGET_BRANCH" >> "$GITHUB_OUTPUT"
-          echo "* **Target Branch:** \`$TARGET_BRANCH\`" >> $GITHUB_STEP_SUMMARY
-
-      - name: Get changed files
-        id: changed-files
-        uses: tj-actions/changed-files@v45
-        with:
-          base_sha: ${{ steps.target-info.outputs.target_branch }}
-          sha: ${{ github.event.workflow_run.head_sha }}
-          files_yaml: |
-            app:
-              - fermentation_station/**
-              - pyproject.toml
-              - poetry.lock
-              - Dockerfile
-              - utils/argo_app_writer.py
-              - utils/templates/**
-              - .github/workflows/ephemeral_environment.yml
-
-      - name: Filter Summary
-        run: |
-          echo "* **App Changes Detected:** ${{ steps.changed-files.outputs.app_any_changed }}" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ steps.changed-files.outputs.app_any_changed }}" != "true" ]; then
-            echo "⏭️ No relevant files changed. Setup will be skipped." >> $GITHUB_STEP_SUMMARY
-          fi
-
-  ephemeral-environment-setup:
-    runs-on: ubuntu-latest
-    needs: changes
-    if: needs.changes.outputs.app == 'true'
-    steps:
       - name: checkout repo
         uses: actions/checkout@v4
         with:
@@ -106,7 +58,7 @@ jobs:
           BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
           PR_NUMBER: ${{ steps.get-pr.outputs.pr_number }}
         run: |
-          LOWER_BRANCH=$(echo "${BRANCH_NAME}" | tr '[:upper:]' '[:lower:]' | tr '/' '-')
+          LOWER_BRANCH=$(echo "${BRANCH_NAME}" | tr '[:upper:]' '[:lower:]' | tr '/_' '-')
           cp ${LOWER_BRANCH}.yaml fermentation-station-argocd-control/apps/${LOWER_BRANCH}.yaml
           cd fermentation-station-argocd-control
           git config user.name "github-actions[bot]"
