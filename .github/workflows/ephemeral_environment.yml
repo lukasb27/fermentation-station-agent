@@ -31,40 +31,20 @@ jobs:
           ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0 # Fetch full history for the head branch
 
-      - name: Get Base SHA
-        id: base-info
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get Target Branch
+        id: target-info
         run: |
-          # 1. Try to get Base SHA from the workflow_run pull_requests context (most reliable)
-          BASE_SHA=$(echo '${{ toJson(github.event.workflow_run.pull_requests) }}' | jq -r '.[0].base.sha // empty')
-          
-          # 2. Fallback to GitHub CLI if context is empty
-          if [ -z "$BASE_SHA" ]; then
-            BASE_SHA=$(gh pr list --repo ${{ github.repository }} --head "${{ github.event.workflow_run.head_branch }}" --json baseRefOid --jq '.[0].baseRefOid // empty')
-          fi
-          
-          # 3. Final fallback to origin/main if still empty
-          if [ -z "$BASE_SHA" ]; then
-            echo "⚠️ Could not determine PR base SHA. Falling back to default branch for comparison." >> $GITHUB_STEP_SUMMARY
-            # Use github.event.repository.default_branch for the default branch name
-            BASE_SHA="origin/${{ github.event.repository.default_branch }}"
-          fi
-          
-          # Ensure the base SHA is fetched if it's a remote ref
-          if [[ "$BASE_SHA" == "origin/"* ]]; then
-            git fetch origin "${BASE_SHA#origin/}"
-          fi
-
-          echo "* **Target Base SHA:** \`${BASE_SHA}\`" >> $GITHUB_STEP_SUMMARY
-          echo "* **Head SHA:** \`${{ github.event.workflow_run.head_sha }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "base_sha=${BASE_SHA}" >> "$GITHUB_OUTPUT"
+          # Extract the target branch (base ref) from the PR context
+          TARGET_BRANCH=$(echo '${{ toJson(github.event.workflow_run.pull_requests) }}' | jq -r '.[0].base.ref // "main"')
+          git fetch origin "$TARGET_BRANCH" --depth=1
+          echo "target_branch=origin/$TARGET_BRANCH" >> "$GITHUB_OUTPUT"
+          echo "* **Target Branch:** \`$TARGET_BRANCH\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@v45
         with:
-          base_sha: ${{ steps.base-info.outputs.base_sha }}
+          base_sha: ${{ steps.target-info.outputs.target_branch }}
           sha: ${{ github.event.workflow_run.head_sha }}
           files_yaml: |
             app:
