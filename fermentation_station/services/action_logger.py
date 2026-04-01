@@ -25,8 +25,10 @@ class ActionLogger:
         self.last_action_file_path = last_action_file_path
         self.logger = logging.getLogger(__name__)
         self.log_path = log_path
-        self.logger.addHandler(logging.FileHandler(log_path))
-        self.logger.setLevel(logging.INFO)
+        # Logical Fix: Only add handlers if they don't exist to prevent duplicates
+        if not self.logger.handlers:
+            self.logger.addHandler(logging.FileHandler(log_path))
+            self.logger.setLevel(logging.INFO)
 
     def _check_file_exists(self) -> bool:
         """Check if the last known action file exists already.
