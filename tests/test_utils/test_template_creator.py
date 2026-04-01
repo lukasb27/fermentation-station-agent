@@ -11,7 +11,7 @@ EXPECTED_OUTPUT = f'''
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: fermentation-station-agent-{branch_lower}
+  name: fs-agent-pr-{PR_NUMBER}
   namespace: argocd
 spec:
   project: default
@@ -27,7 +27,7 @@ spec:
         sha: {SHA}
   destination:
     server: https://kubernetes.default.svc
-    namespace: {branch_lower}
+    namespace: fs-pr-{PR_NUMBER}
   syncPolicy:
     automated:
       prune: true
