@@ -21,7 +21,7 @@ spec:
     path: k8s
     kustomize:
       images:
-        - lukasball/fermentation-station-agent=lukasball/fermentation-station-agent:{branch_lower}
+        - lukasball/fermentation-station-agent=lukasball/fermentation-station-agent:{BRANCH}
       commonAnnotations:
         prNumber: "{PR_NUMBER}"
         sha: {SHA}

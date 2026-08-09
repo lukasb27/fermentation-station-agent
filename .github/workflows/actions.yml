@@ -61,6 +61,26 @@ jobs:
         # https://github.com/actions/setup-python
       - name: Install jinja2
         run: pip install jinja2
+      - name: Wait for Docker image to be pushed
+        env:
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          IMAGE="lukasball/fermentation-station-agent"
+          ENCODED_TAG=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "${BRANCH}")
+
+          echo "Waiting for ${IMAGE}:${BRANCH} to appear on Docker Hub (built by docker.yml off the same push)..."
+          for i in $(seq 1 40); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://hub.docker.com/v2/repositories/${IMAGE}/tags/${ENCODED_TAG}")
+            if [ "${STATUS}" = "200" ]; then
+              echo "Found ${IMAGE}:${BRANCH} on Docker Hub."
+              exit 0
+            fi
+            echo "Attempt ${i}/40: not available yet (HTTP ${STATUS}). Retrying in 15s..."
+            sleep 15
+          done
+
+          echo "Timed out waiting for ${IMAGE}:${BRANCH} to be pushed to Docker Hub." >&2
+          exit 1
       - name: Run YAML generator
         env:
           BRANCH: ${{ github.head_ref }}
