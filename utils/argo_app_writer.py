@@ -11,7 +11,7 @@ def create_template(branch: str, sha: str, pr_number: str) -> str:
     output = template.render(
         APP_NAME=f"fermentation-station-agent-{branch_lower}",
         NAMESPACE=branch_lower,
-        IMAGE=f"lukasball/fermentation-station-agent:{branch_lower}",
+        IMAGE=f"lukasball/fermentation-station-agent:{branch}",
         BRANCH=branch,
         SHA=sha,
         PR_NUMBER=pr_number
