@@ -13,6 +13,8 @@ kind: Application
 metadata:
   name: fermentation-station-agent-{branch_lower}
   namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
