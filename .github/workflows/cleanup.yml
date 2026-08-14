@@ -4,6 +4,9 @@ on:
   pull_request:
     types: [closed]
 
+env:
+  APP_NAME: fermentation-station-agent
+
 jobs:
   delete-yaml:
     runs-on: ubuntu-latest
@@ -18,17 +21,20 @@ jobs:
         env:
           BRANCH_NAME: ${{ github.head_ref }}
         run: |
-          # Standardize the branch name to match the creation logic
-          LOWER_BRANCH=$(echo "${BRANCH_NAME}" | tr '[:upper:]' '[:lower:]')
-          FILE_PATH="apps/${LOWER_BRANCH}.yaml"
+          # Must match the slugification in argo_app_writer.py / actions.yml exactly,
+          # or this silently no-ops (the -f check below swallows any mismatch).
+          BRANCH_SLUG=$(echo "${BRANCH_NAME}" | tr '[:upper:]' '[:lower:]' | tr '/' '-' | tr -cd 'a-z0-9-')
+          FULL_NAME="${APP_NAME}-${BRANCH_SLUG}"
+          FULL_NAME="${FULL_NAME:0:63}"
+          FILE_PATH="apps/${FULL_NAME}.yaml"
           # Only proceed if the file exists
           if [ -f "$FILE_PATH" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
-            
+
             rm "$FILE_PATH"
             git add "$FILE_PATH"
-            git commit -m "Cleanup: Remove ArgoCD app for closed PR (Branch: ${LOWER_BRANCH})"
+            git commit -m "Cleanup: Remove ArgoCD app for closed PR (Branch: ${FULL_NAME})"
             git push
           else
             echo "File $FILE_PATH not found, nothing to clean up."

@@ -24,6 +24,10 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.annotations['commitSha']
+        - name: REPO_SLUG
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['repoSlug']
       volumes:
       - name: token-volume
         secret:

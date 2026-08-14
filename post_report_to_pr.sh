@@ -38,7 +38,7 @@ curl -L \
   -H "Accept: application/vnd.github+json" \
   -H "Authorization: Bearer $GH_TOKEN" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
-  https://api.github.com/repos/lukasb27/fermentation-station-agent/issues/$PR_NUMBER/comments \
+  "https://api.github.com/repos/${REPO_SLUG}/issues/${PR_NUMBER}/comments" \
   -d "$PAYLOAD"
 
 STATE="success"
@@ -49,7 +49,7 @@ fi
 curl -X POST \
   -H "Authorization: Bearer $GH_TOKEN" \
   -H "Accept: application/vnd.github+json" \
-  https://api.github.com/repos/lukasb27/fermentation-station-agent/statuses/051db5850a5e924549a7c006cd6913b5622b1754 \
+  "https://api.github.com/repos/${REPO_SLUG}/statuses/${COMMIT_SHA}" \
   -d "{
     \"state\": \"$STATE\",
     \"target_url\": \"https://your-logs-link.com\",
