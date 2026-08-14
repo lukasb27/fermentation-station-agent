@@ -88,7 +88,9 @@ WORKDIR /app
 
 # k8s/deployment.yaml sets runAsNonRoot: true
 RUN useradd --create-home --uid 1000 appuser
-USER appuser
+# Kubernetes' runAsNonRoot check needs a numeric UID to verify statically —
+# a named USER can't be resolved without running the container.
+USER 1000
 
 EXPOSE 8000
 CMD ["uvicorn", "fermentation_station.main:app", "--host", "0.0.0.0", "--port", "8000"]
