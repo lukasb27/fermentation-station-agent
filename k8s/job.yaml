@@ -11,6 +11,7 @@ spec:
       containers:
       - name: integ-test
         image: lukasball/fermentation-station-agent-integ-tests:latest
+        imagePullPolicy: Always
         volumeMounts:
         - name: token-volume
           mountPath: /etc/github
@@ -24,6 +25,10 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.annotations['commitSha']
+        - name: REPO_SLUG
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['repoSlug']
       volumes:
       - name: token-volume
         secret:

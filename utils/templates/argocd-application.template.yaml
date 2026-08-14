@@ -14,9 +14,11 @@ spec:
     kustomize:
       images:
         - lukasball/fermentation-station-agent={{ IMAGE }}
+        - lukasball/fermentation-station-agent-integ-tests={{ TEST_IMAGE }}
       commonAnnotations:
         prNumber: "{{PR_NUMBER }}"
-        sha: {{ SHA }}
+        commitSha: {{ SHA }}
+        repoSlug: {{ REPO_SLUG }}
   destination:
     server: https://kubernetes.default.svc
     namespace: {{ NAMESPACE }}

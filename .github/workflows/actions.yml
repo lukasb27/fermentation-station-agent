@@ -4,6 +4,9 @@ on: pull_request
 permissions:
   pull-requests: write
 
+env:
+  APP_NAME: fermentation-station-agent
+
 jobs:
   ci:
     runs-on: ubuntu-latest
@@ -61,49 +64,56 @@ jobs:
         # https://github.com/actions/setup-python
       - name: Install jinja2
         run: pip install jinja2
-      - name: Wait for Docker image to be pushed
+      - name: Wait for Docker images to be pushed
         env:
           BRANCH: ${{ github.head_ref }}
         run: |
-          IMAGE="lukasball/fermentation-station-agent"
           ENCODED_TAG=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "${BRANCH}")
 
-          echo "Waiting for ${IMAGE}:${BRANCH} to appear on Docker Hub (built by docker.yml off the same push)..."
-          for i in $(seq 1 40); do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://hub.docker.com/v2/repositories/${IMAGE}/tags/${ENCODED_TAG}")
-            if [ "${STATUS}" = "200" ]; then
-              echo "Found ${IMAGE}:${BRANCH} on Docker Hub."
-              exit 0
+          for IMAGE in lukasball/fermentation-station-agent lukasball/fermentation-station-agent-integ-tests; do
+            echo "Waiting for ${IMAGE}:${BRANCH} to appear on Docker Hub (built by docker.yml off the same push)..."
+            FOUND=0
+            for i in $(seq 1 40); do
+              STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://hub.docker.com/v2/repositories/${IMAGE}/tags/${ENCODED_TAG}")
+              if [ "${STATUS}" = "200" ]; then
+                echo "Found ${IMAGE}:${BRANCH} on Docker Hub."
+                FOUND=1
+                break
+              fi
+              echo "Attempt ${i}/40: not available yet (HTTP ${STATUS}). Retrying in 15s..."
+              sleep 15
+            done
+            if [ "${FOUND}" -ne 1 ]; then
+              echo "Timed out waiting for ${IMAGE}:${BRANCH} to be pushed to Docker Hub." >&2
+              exit 1
             fi
-            echo "Attempt ${i}/40: not available yet (HTTP ${STATUS}). Retrying in 15s..."
-            sleep 15
           done
-
-          echo "Timed out waiting for ${IMAGE}:${BRANCH} to be pushed to Docker Hub." >&2
-          exit 1
       - name: Run YAML generator
         env:
           BRANCH: ${{ github.head_ref }}
-          SHA: ${{ github.sha }}
+          SHA: ${{ github.event.pull_request.head.sha }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO_SLUG: ${{ github.repository }}
         run: python3 fermentation-station-agent/utils/argo_app_writer.py
       - name: Copy YAML file to new repo and push
         env:
           BRANCH_NAME: ${{ github.head_ref }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          LOWER_BRANCH=$(echo "${BRANCH_NAME}" | tr '[:upper:]' '[:lower:]')
+          BRANCH_SLUG=$(echo "${BRANCH_NAME}" | tr '[:upper:]' '[:lower:]' | tr '/' '-' | tr -cd 'a-z0-9-')
+          FULL_NAME="${APP_NAME}-${BRANCH_SLUG}"
+          FULL_NAME="${FULL_NAME:0:63}"
 
-          cp ${LOWER_BRANCH}.yaml fermentation-station-argocd-control/apps/${LOWER_BRANCH}.yaml
+          cp "${FULL_NAME}.yaml" "fermentation-station-argocd-control/apps/${FULL_NAME}.yaml"
 
           # Move into the external repo directory to perform Git operations
           cd fermentation-station-argocd-control
-          
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          
-          git add apps/${LOWER_BRANCH}.yaml
-         
+
+          git add "apps/${FULL_NAME}.yaml"
+
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else

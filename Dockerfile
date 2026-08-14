@@ -32,7 +32,7 @@ WORKDIR $PYSETUP_PATH
 COPY poetry.lock pyproject.toml ./
 
 RUN --mount=type=cache,target=/root/.cache \
-    poetry install --no-root
+    poetry install --no-root --without dev
 
 # RUN poetry config virtualenvs.create false \
     # && poetry install --no-root
@@ -48,7 +48,7 @@ COPY --from=builder-base $POETRY_HOME $POETRY_HOME
 
 WORKDIR $PYSETUP_PATH
 RUN apt-get update && apt-get install curl jq -y
-RUN poetry install --with integ-test --no-root
+RUN poetry install --without dev --with integ-test --no-root
 
 WORKDIR /app
 COPY ./integration_tests /app/integration_tests
@@ -85,6 +85,10 @@ ENV FASTAPI_ENV=production
 COPY --from=builder-base $PYSETUP_PATH $PYSETUP_PATH
 COPY ./fermentation_station /app/fermentation_station
 WORKDIR /app
+
+# k8s/deployment.yaml sets runAsNonRoot: true
+RUN useradd --create-home --uid 1000 appuser
+USER appuser
 
 EXPOSE 8000
 CMD ["uvicorn", "fermentation_station.main:app", "--host", "0.0.0.0", "--port", "8000"]

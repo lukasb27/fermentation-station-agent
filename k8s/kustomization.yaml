@@ -5,8 +5,12 @@ resources:
   - deployment.yaml
   - service.yaml
   - job.yaml
+  - resourcequota.yaml
 
 images:
   - name: lukasball/fermentation-station-agent
     newName: lukasball/fermentation-station-agent
     newTag: main
+  - name: lukasball/fermentation-station-agent-integ-tests
+    newName: lukasball/fermentation-station-agent-integ-tests
+    newTag: latest
