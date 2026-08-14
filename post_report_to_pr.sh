@@ -1,14 +1,20 @@
 #!/bin/bash
 export GH_TOKEN=$(cat /etc/github/token)
 
-behave -f plain --summary > summary.txt 2>&1
-behave -f json -o results.json > /dev/null 2>&1 || true
+# Single behave run producing both the human-readable log and the machine-readable
+# results, so the two can never disagree with each other (running behave twice, once
+# per format, let the reported counts and the displayed log come from two separate
+# test executions racing the same not-yet-ready service).
+behave -f plain --summary -o summary.txt -f json -o results.json
 
-TOTAL=$(grep -c '"type": "scenario"' results.json | tr -d '\n' || echo "0")
-FAILED=$(grep -c '"status": "failed"' results.json | tr -d '\n' || echo "0")
-PASSED=$(grep -c '"status": "passed"' results.json | tr -d '\n' || echo "0")
-ERRORS=$(grep -c '"status": "error"' results.json | tr -d '\n' || echo "0")
-
+# Scenario-level counts via jq, not grep -c: results.json is one compact line, so
+# grep -c counts matching *lines* (0 or 1), not occurrences of the pattern within it —
+# and a naive substring count would also double-count step-level "status" fields
+# nested inside each scenario.
+TOTAL=$(jq -r '[.[].elements[]? | select(.type=="scenario")] | length' results.json 2>/dev/null || echo 0)
+PASSED=$(jq -r '[.[].elements[]? | select(.type=="scenario" and .status=="passed")] | length' results.json 2>/dev/null || echo 0)
+FAILED=$(jq -r '[.[].elements[]? | select(.type=="scenario" and .status=="failed")] | length' results.json 2>/dev/null || echo 0)
+ERRORS=$(jq -r '[.[].elements[]? | select(.type=="scenario" and .status=="error")] | length' results.json 2>/dev/null || echo 0)
 
 REPORT_BODY=$(cat <<EOF
 ## 🧪 Behave Test Results
