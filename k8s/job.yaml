@@ -3,7 +3,11 @@ kind: Job
 metadata:
   name: integ-tests
   annotations:
-    argocd.argoproj.io/hook: Sync
+    # PostSync (not Sync) so this only runs once the Deployment is actually
+    # rolled out and healthy — Sync hooks run concurrently with normal
+    # resources, which raced the integ tests against a pod that wasn't
+    # ready yet.
+    argocd.argoproj.io/hook: PostSync
     argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 spec:
   template:
