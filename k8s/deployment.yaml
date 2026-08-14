@@ -23,6 +23,7 @@ spec:
           type: RuntimeDefault
       containers:
       - image: lukasball/fermentation-station-agent:latest
+        imagePullPolicy: Always
         name: fermentation-station-agent
         ports:
         - containerPort: 8000

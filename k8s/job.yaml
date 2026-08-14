@@ -11,6 +11,7 @@ spec:
       containers:
       - name: integ-test
         image: lukasball/fermentation-station-agent-integ-tests:latest
+        imagePullPolicy: Always
         volumeMounts:
         - name: token-volume
           mountPath: /etc/github
