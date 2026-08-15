@@ -1,6 +1,10 @@
 # Fermentation Station — Agent
 
-The `fermentation-station-agent` is a FastAPI microservice designed to run on a node within a fermentation monitoring system. It exposes sensor data over HTTP and is built to be deployed and managed remotely via the [fermentation-station-argocd-control](https://github.com/lukasb27/fermentation-station-argocd-control) repo.
+The `fermentation-station-agent` is a FastAPI microservice designed to run on a node within a fermentation monitoring system. It exposes sensor data over HTTP and is built to be deployed and managed remotely via the [application-argocd-control](https://github.com/lukasb27/application-argocd-control) repo.
+
+> **Note:** this service predates the [golden-path template](https://github.com/lukasb27/backstage-templates) and runs its own bespoke CI (Jinja2-templated manifests, Behave tests, Docker Hub images) rather than the shared `http-service` template — the architecture below describes only this service's own pipeline, not the wider system. See
+> [backstage-templates' platform overview](https://github.com/lukasb27/backstage-templates/blob/main/docs/platform-overview.md)
+> for how this service fits alongside golden-path services sharing the same `application-argocd-control` repo. Migrating this service onto the golden path is tracked as future work, not done.
 
 ---
 
@@ -19,7 +23,7 @@ flowchart TD
         D --> E[Push YAML to\nargocd-control repo]
     end
 
-    E --> F[(fermentation-station-argocd-control\nGitOps source of truth)]
+    E --> F[(application-argocd-control\nGitOps source of truth)]
 
     F -->|ArgoCD detects change & syncs| G
 
@@ -46,7 +50,7 @@ On PR close, GitHub Actions automatically removes the ArgoCD Application YAML fr
 | Repo | Purpose |
 |---|---|
 | `fermentation-station-agent` (this repo) | FastAPI microservice, CI pipeline, Docker image |
-| [`fermentation-station-argocd-control`](https://github.com/lukasb27/fermentation-station-argocd-control) | GitOps control repo — ArgoCD Application manifests |
+| [`application-argocd-control`](https://github.com/lukasb27/application-argocd-control) | GitOps control repo — ArgoCD Application manifests |
 
 ---
 
