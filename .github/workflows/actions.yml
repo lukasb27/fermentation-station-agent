@@ -53,9 +53,9 @@ jobs:
       - name: check out argo cd control repo
         uses: actions/checkout@v4
         with:
-          repository: lukasb27/fermentation-station-argocd-control
+          repository: lukasb27/application-argocd-control
           token: ${{ secrets.ARGO_CD_REPO_TOKEN }}
-          path: fermentation-station-argocd-control
+          path: application-argocd-control
       - name: Install Python
         uses: actions/setup-python@v4
         with:
@@ -104,10 +104,10 @@ jobs:
           FULL_NAME="${APP_NAME}-${BRANCH_SLUG}"
           FULL_NAME="${FULL_NAME:0:63}"
 
-          cp "${FULL_NAME}.yaml" "fermentation-station-argocd-control/apps/${FULL_NAME}.yaml"
+          cp "${FULL_NAME}.yaml" "application-argocd-control/apps/${FULL_NAME}.yaml"
 
           # Move into the external repo directory to perform Git operations
-          cd fermentation-station-argocd-control
+          cd application-argocd-control
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
