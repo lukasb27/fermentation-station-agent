@@ -146,3 +146,5 @@ On every pull request, the pipeline:
 7. Posts integration test results back to the PR
 
 On PR close, the ephemeral environment is automatically cleaned up.
+
+<!-- test PR to generate a sample ephemeral environment for stale-environment-finder plugin dev -->
